@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>PC Stats</h1>
+    <p>CPU Usage: <progress id="cpuProgress" value="0" max="100"></progress> <span id="cpu"></span>%</p>
+    <p>Memory Usage: <progress id="memProgress" value="0" max="100"></progress> <span id="memory"></span>%</p>
+    <p>Disk Usage: <span id="disk"></span>%</p>
+    <p>GPU Usage:<span id="gpu"></span>%</p></p>
+
+
+    <h1>Volume Control</h1>
+    <div id="volume-controls">
+{#        <div id="master-volume">#}
+{#        <p>Master Volume: <span id="volume-{{ loop.index }}">{{ process.volume }}</span>%</p>#}
+{#            <input#}
+{#                type="range"#}
+{#                min="0"#}
+{#                max="100"#}
+{#                value="{{ process.volume }}"#}
+{#                onchange="updateVolume('{{ process.process }}', this.value)"#}
+{#            />#}
+{##}
+{#        </div>#}
+        {% for process in process_volumes %}
+        <div>
+            <p>{{ process.process }}: <span id="volume-{{ loop.index }}">{{ process.volume }}</span>%</p>
+            <input
+                type="range"
+                min="0"
+                max="100"
+                value="{{ process.volume }}"
+                onchange="updateVolume('{{ process.process }}', this.value)"
+            />
+        </div>
+        {% endfor %}
+    </div>
+
+{#    <button onclick="sendAction('open_browser')">Open Browser</button>#}
+    <script>
+         async function updateVolume(processName, volume) {
+        try {
+            const response = await fetch('/update_volume', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    process: processName,
+                    volume: volume
+                })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                console.log(`Volume updated for ${processName}: ${volume}%`);
+            } else {
+                console.error(`Failed to update volume: ${result.error}`);
+            }
+        } catch (error) {
+            console.error('Error updating volume:', error);
+        }
+    }
+        function sendAction(action) {
+            fetch('/action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'action=' + action
+            });
+        }
+
+        async function fetchStats() {
+            const response = await fetch('/stats');
+            const data = await response.json();
+            document.getElementById('cpu').innerText = data.cpu;
+            document.getElementById('cpuProgress').value = data.cpu;
+            document.getElementById('memory').innerText = data.memory;
+            document.getElementById('memProgress').value = data.memory;
+            document.getElementById('disk').innerText = data.disk;
+            document.getElementById('gpu').innerText = data.GPU;
+        }
+
+        setInterval(fetchStats, 5000); // Update every 5 seconds
+        fetchStats();
+        async function fetchVolumes() {
+        try {
+            const response = await fetch('/get_volumes');
+            if (response.ok) {
+                const data = await response.json();
+                data.forEach((process, index) => {
+                    const slider = document.querySelector(`#slider-${index}`);
+                    const label = document.querySelector(`#volume-${index}`);
+
+                    if (slider && label) {
+                        slider.value = process.volume;  // Update the slider
+                        label.innerText = process.volume;  // Update the label
+                    }
+                });
+            } else {
+                console.error('Failed to fetch volume data');
+            }
+        } catch (error) {
+            console.error('Error fetching volumes:', error);
+        }
+    }
+
+    // Fetch volumes every 5 seconds
+    setInterval(fetchVolumes, 5000);
+    </script>
+</body>
+</html>
