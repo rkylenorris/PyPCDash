@@ -1,0 +1,27 @@
+Touchscreen Dashboard Notes
+
+1. Components Needed:
+   - Raspberry Pi
+   - Touchscreen Monitor
+   - Python Libraries: Flask, os
+
+2. Functionality:
+   - Host a simple Flask web app to serve a control dashboard.
+   - Use HTML and JavaScript to create buttons triggering actions.
+
+3. Communication:
+   - Raspberry Pi sends commands via HTTP POST requests.
+   - Desktop PC executes the commands.
+
+4. Future Extensions:
+   - Add system monitoring feedback (e.g., CPU usage, RAM).
+   - Expand to control media playback or integrate APIs.
+
+5. Setup Instructions:
+   - Place `app.py` in the main project directory.
+   - Place `dashboard.html` in a `templates` folder.
+   - Run `python app.py` and access the dashboard from a browser.
+
+6. Security Tips:
+   - Use SSH or secure network configurations.
+   - Limit network access to trusted devices.
