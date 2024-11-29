@@ -49,7 +49,7 @@ def stats():
         'cpu': psutil.cpu_percent(interval=1),
         'memory': psutil.virtual_memory().percent,
         'disk': psutil.disk_usage('/').percent,
-        'GPU': round(gpus[0].load * 100, 2)
+        'GPU': 0 if len(gpus) == 0 else round(gpus[0].load * 100, 2)
     }
     return jsonify(pc_stats)
 
